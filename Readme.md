@@ -44,7 +44,7 @@
 **4. Creating a Logout Route**
 
 - Modify the `/logout` route to accept a `username` as a parameter.
-- Return a message in HTML format that displays `<b>{username} successfully logged out.<b>` when a user accesses the `/logout` route.
+- Return a message in HTML format that displays `<b>{username} successfully logged out.</b>` when a user accesses the `/logout` route.
 
 **5. Add error handling middleware to handle below error**
 
@@ -61,18 +61,48 @@ app.use((err,req,res,next) => {
 **6. Explain the Purpose of `express.Router()` in the Code Above.**
 
 - Why is `express.Router()` used in Express.js applications, and how does it benefit the code structure?
+express.Router() lets you create modular, mountable route handlers. Instead of putting every route in index.js, you group related routes into their own files (e.g., routes/users.js) and then mount them with a base path.
+Benefits:
+Separation of concerns: Each feature/domain gets its own router file.
+Maintainability: Smaller files are easier to read, test, and refactor.
+Scoped middleware: You can attach middleware to a specific router only.
+Reusability: Routers can be reused or moved without touching the main app.
 
 **7. Error Handling in Express.js**
 
 - How would you implement error handling in the Express routes to ensure that any issues (such as file not found or server errors) are appropriately handled? Provide an example.
 
+1. 404 Not Found (runs after all routes)
+app.use((req, res) => {
+  res.status(404).json({ status: false, message: 'Not Found' });
+});
+
+2. Centralized Error Handler (must have 4 args)
+
+app.use((err, req, res, next) => {
+  console.error(err);              // log for debugging
+  res.status(500).send('Server Error'); // required by the lab
+});
+
+Example usage inside a route (try/catch + next):
+"router.get('/profile', (req, res, next) => {
+  try {
+    const user = readUser(); // read from user.json
+    res.json(user);
+  } catch (err) {
+    next(err); // hands off to the 500 error handler
+  }
+});"
 ---
 
 #### Section C: Bonus
 
-**7. Dynamic Port Binding in Express.js**
+**8. Dynamic Port Binding in Express.js**
 
 - Explain how the `app.listen(process.env.port || 8081)` line works and why it's useful in production environments.
+In production (e.g., cloud platforms like Heroku, Render, Azure), the host provides a dynamic port via an environment variable (commonly PORT). Your app must listen on that port to receive traffic.
+Locally, you probably don’t have PORT set, so it falls back to 8081.
+This pattern makes your app portable—it runs on your machine and on any hosting platform without code changes.
 
 ---
 # Submission Guideline
